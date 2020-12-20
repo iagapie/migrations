@@ -76,7 +76,8 @@ final class MigrateCommand extends DoctrineCommand
                 'Wrap the entire migration in a transaction.',
                 false
             )
-            ->setHelp(<<<EOT
+            ->setHelp(
+                <<<EOT
 The <info>%command.name%</info> command executes a migration to a specified version or the latest available version:
 
     <info>%command.full_name%</info>
@@ -126,13 +127,13 @@ EOT
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $migratorConfigurationFactory = $this->getDependencyFactory()->getConsoleInputMigratorConfigurationFactory();
-        $migratorConfiguration        = $migratorConfigurationFactory->getMigratorConfiguration($input);
+        $migratorConfiguration = $migratorConfigurationFactory->getMigratorConfiguration($input);
 
         $question = sprintf(
             'WARNING! You are about to execute a migration in database "%s" that could result in schema changes and data loss. Are you sure you wish to continue?',
             $this->getDependencyFactory()->getConnection()->getDatabase() ?? '<unnamed>'
         );
-        if (! $migratorConfiguration->isDryRun() && ! $this->canExecute($question, $input)) {
+        if (!$migratorConfiguration->isDryRun() && !$this->canExecute($question, $input)) {
             $this->io->error('Migration cancelled!');
 
             return 3;
@@ -141,10 +142,10 @@ EOT
         $this->getDependencyFactory()->getMetadataStorage()->ensureInitialized();
 
         $allowNoMigration = $input->getOption('allow-no-migration');
-        $versionAlias     = $input->getArgument('version');
+        $versionAlias = $input->getArgument('version');
 
         $path = $input->getOption('write-sql') ?? getcwd();
-        if (is_string($path) && ! is_writable($path)) {
+        if (is_string($path) && !is_writable($path)) {
             $this->io->error(sprintf('The path "%s" not writeable!', $path));
 
             return 1;
@@ -171,18 +172,20 @@ EOT
         try {
             $version = $this->getDependencyFactory()->getVersionAliasResolver()->resolveVersionAlias($versionAlias);
         } catch (UnknownMigrationVersion $e) {
-            $this->io->error(sprintf(
-                'Unknown version: %s',
-                OutputFormatter::escape($versionAlias)
-            ));
+            $this->io->error(
+                sprintf(
+                    'Unknown version: %s',
+                    OutputFormatter::escape($versionAlias)
+                )
+            );
 
             return 1;
         } catch (NoMigrationsToExecute | NoMigrationsFoundWithCriteria $e) {
             return $this->exitForAlias($versionAlias);
         }
 
-        $planCalculator                = $this->getDependencyFactory()->getMigrationPlanCalculator();
-        $statusCalculator              = $this->getDependencyFactory()->getMigrationStatusCalculator();
+        $planCalculator = $this->getDependencyFactory()->getMigrationPlanCalculator();
+        $statusCalculator = $this->getDependencyFactory()->getMigrationStatusCalculator();
         $executedUnavailableMigrations = $statusCalculator->getExecutedUnavailableMigrations();
 
         if ($this->checkExecutedUnavailableMigrations($executedUnavailableMigrations, $input) === false) {
@@ -196,15 +199,15 @@ EOT
         }
 
         $this->getDependencyFactory()->getLogger()->notice(
-            'Migrating' . ($migratorConfiguration->isDryRun() ? ' (dry-run)' : '') . ' {direction} to {to}',
+            'Migrating'.($migratorConfiguration->isDryRun() ? ' (dry-run)' : '').' {direction} to {to}',
             [
                 'direction' => $plan->getDirection(),
-                'to' => (string) $version,
+                'to' => (string)$version,
             ]
         );
 
         $migrator = $this->getDependencyFactory()->getMigrator();
-        $sql      = $migrator->migrate($plan, $migratorConfiguration);
+        $sql = $migrator->migrate($plan, $migratorConfiguration);
 
         if (is_string($path)) {
             $writer = $this->getDependencyFactory()->getQueryWriter();
@@ -221,24 +224,28 @@ EOT
         InputInterface $input
     ): bool {
         if (count($executedUnavailableMigrations) !== 0) {
-            $this->io->warning(sprintf(
-                'You have %s previously executed migrations in the database that are not registered migrations.',
-                count($executedUnavailableMigrations)
-            ));
+            $this->io->warning(
+                sprintf(
+                    'You have %s previously executed migrations in the database that are not registered migrations.',
+                    count($executedUnavailableMigrations)
+                )
+            );
 
             foreach ($executedUnavailableMigrations->getItems() as $executedUnavailableMigration) {
-                $this->io->text(sprintf(
-                    '<comment>>></comment> %s (<comment>%s</comment>)',
-                    $executedUnavailableMigration->getExecutedAt() !== null
-                        ? $executedUnavailableMigration->getExecutedAt()->format('Y-m-d H:i:s')
-                        : null,
-                    $executedUnavailableMigration->getVersion()
-                ));
+                $this->io->text(
+                    sprintf(
+                        '<comment>>></comment> %s (<comment>%s</comment>)',
+                        $executedUnavailableMigration->getExecutedAt() !== null
+                            ? $executedUnavailableMigration->getExecutedAt()->format('Y-m-d H:i:s')
+                            : null,
+                        $executedUnavailableMigration->getVersion()
+                    )
+                );
             }
 
             $question = 'Are you sure you wish to continue?';
 
-            if (! $this->canExecute($question, $input)) {
+            if (!$this->canExecute($question, $input)) {
                 $this->io->error('Migration cancelled!');
 
                 return false;
@@ -257,7 +264,7 @@ EOT
             $message = sprintf(
                 'Already at the %s version ("%s")',
                 $versionAlias,
-                (string) $version
+                (string)$version
             );
 
             $this->io->success($message);
@@ -265,14 +272,14 @@ EOT
             $message = sprintf(
                 'The version "%s" couldn\'t be reached, you are at version "%s"',
                 $versionAlias,
-                (string) $version
+                (string)$version
             );
 
             $this->io->error($message);
         } else {
             $message = sprintf(
                 'You are already at version "%s"',
-                (string) $version
+                (string)$version
             );
 
             $this->io->success($message);

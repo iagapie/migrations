@@ -16,8 +16,8 @@ use function strtolower;
  */
 final class Configuration
 {
-    public const VERSIONS_ORGANIZATION_NONE              = 'none';
-    public const VERSIONS_ORGANIZATION_BY_YEAR           = 'year';
+    public const VERSIONS_ORGANIZATION_NONE = 'none';
+    public const VERSIONS_ORGANIZATION_BY_YEAR = 'year';
     public const VERSIONS_ORGANIZATION_BY_YEAR_AND_MONTH = 'year_and_month';
 
     /** @var array<string, string> */
@@ -43,9 +43,6 @@ final class Configuration
 
     /** @var string|null */
     private $connectionName;
-
-    /** @var string|null */
-    private $entityManagerName;
 
     /** @var bool */
     private $checkDbPlatform = true;
@@ -118,17 +115,6 @@ final class Configuration
         $this->connectionName = $connectionName;
     }
 
-    public function getEntityManagerName(): ?string
-    {
-        return $this->entityManagerName;
-    }
-
-    public function setEntityManagerName(?string $entityManagerName): void
-    {
-        $this->assertNotFrozen();
-        $this->entityManagerName = $entityManagerName;
-    }
-
     public function setCustomTemplate(?string $customTemplate): void
     {
         $this->assertNotFrozen();
@@ -162,7 +148,7 @@ final class Configuration
         bool $migrationsAreOrganizedByYearAndMonth = true
     ): void {
         $this->assertNotFrozen();
-        $this->migrationsAreOrganizedByYear         = $migrationsAreOrganizedByYearAndMonth;
+        $this->migrationsAreOrganizedByYear = $migrationsAreOrganizedByYearAndMonth;
         $this->migrationsAreOrganizedByYearAndMonth = $migrationsAreOrganizedByYearAndMonth;
     }
 

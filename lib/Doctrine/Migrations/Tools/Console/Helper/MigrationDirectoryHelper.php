@@ -28,7 +28,7 @@ class MigrationDirectoryHelper
     {
         $dir = rtrim($dir, '/');
 
-        if (! file_exists($dir)) {
+        if (!file_exists($dir)) {
             throw DirectoryDoesNotExist::new($dir);
         }
 
@@ -47,7 +47,7 @@ class MigrationDirectoryHelper
 
     private function appendDir(string $dir): string
     {
-        return DIRECTORY_SEPARATOR . $dir;
+        return DIRECTORY_SEPARATOR.$dir;
     }
 
     private function createDirIfNotExists(string $dir): void

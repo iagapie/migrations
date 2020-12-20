@@ -15,7 +15,7 @@ final class PhpFile extends ConfigurationFile
 {
     public function getConfiguration(): Configuration
     {
-        if (! file_exists($this->file)) {
+        if (!file_exists($this->file)) {
             throw FileNotFound::new($this->file);
         }
 

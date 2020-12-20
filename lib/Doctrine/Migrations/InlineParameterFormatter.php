@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Doctrine\Migrations;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Types\ConversionException;
 use Doctrine\DBAL\Types\Type;
 
 use function array_map;
@@ -18,8 +20,6 @@ use function sprintf;
 /**
  * The InlineParameterFormatter class is responsible for formatting SQL query parameters to a string
  * for display output.
- *
- * @internal
  */
 final class InlineParameterFormatter implements ParameterFormatter
 {
@@ -34,6 +34,7 @@ final class InlineParameterFormatter implements ParameterFormatter
     /**
      * @param mixed[] $params
      * @param mixed[] $types
+     * @return string
      */
     public function formatParameters(array $params, array $types): string
     {
@@ -46,7 +47,7 @@ final class InlineParameterFormatter implements ParameterFormatter
         foreach ($params as $key => $value) {
             $type = $types[$key] ?? 'string';
 
-            $formattedParameter = '[' . $this->formatParameter($value, $type) . ']';
+            $formattedParameter = '['.$this->formatParameter($value, $type).']';
 
             $formattedParameters[] = is_string($key)
                 ? sprintf(':%s => %s', $key, $formattedParameter)
@@ -59,8 +60,9 @@ final class InlineParameterFormatter implements ParameterFormatter
     /**
      * @param string|int $value
      * @param string|int $type
-     *
      * @return string|int
+     * @throws Exception
+     * @throws ConversionException
      */
     private function formatParameter($value, $type)
     {
@@ -76,17 +78,24 @@ final class InlineParameterFormatter implements ParameterFormatter
 
     /**
      * @param int[]|bool[]|string[]|array|int|string|bool $value
+     * @return string
      */
     private function parameterToString($value): string
     {
         if (is_array($value)) {
-            return implode(', ', array_map(function ($value): string {
-                return $this->parameterToString($value);
-            }, $value));
+            return implode(
+                ', ',
+                array_map(
+                    function ($value): string {
+                        return $this->parameterToString($value);
+                    },
+                    $value
+                )
+            );
         }
 
         if (is_int($value) || is_string($value)) {
-            return (string) $value;
+            return (string)$value;
         }
 
         if (is_bool($value)) {

@@ -70,7 +70,8 @@ final class ExecuteCommand extends DoctrineCommand
                 InputOption::VALUE_NONE,
                 'Time all the queries individually.'
             )
-            ->setHelp(<<<EOT
+            ->setHelp(
+                <<<EOT
 The <info>%command.name%</info> command executes migration versions up or down manually:
 
     <info>%command.full_name% FQCN</info>
@@ -102,7 +103,7 @@ one migration at once:
     <info>%command.full_name% FQCN-1 FQCN-2 ...FQCN-n </info>
 
 EOT
-        );
+            );
 
         parent::configure();
     }
@@ -110,13 +111,13 @@ EOT
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $migratorConfigurationFactory = $this->getDependencyFactory()->getConsoleInputMigratorConfigurationFactory();
-        $migratorConfiguration        = $migratorConfigurationFactory->getMigratorConfiguration($input);
+        $migratorConfiguration = $migratorConfigurationFactory->getMigratorConfiguration($input);
 
         $question = sprintf(
             'WARNING! You are about to execute a migration in database "%s" that could result in schema changes and data loss. Are you sure you wish to continue?',
             $this->getDependencyFactory()->getConnection()->getDatabase() ?? '<unnamed>'
         );
-        if (! $migratorConfiguration->isDryRun() && ! $this->canExecute($question, $input)) {
+        if (!$migratorConfiguration->isDryRun() && !$this->canExecute($question, $input)) {
             $this->io->error('Migration cancelled!');
 
             return 1;
@@ -124,25 +125,31 @@ EOT
 
         $this->getDependencyFactory()->getMetadataStorage()->ensureInitialized();
 
-        $versions  = $input->getArgument('versions');
+        $versions = $input->getArgument('versions');
         $direction = $input->getOption('down') !== false
             ? Direction::DOWN
             : Direction::UP;
 
         $path = $input->getOption('write-sql') ?? getcwd();
-        if (is_string($path) && ! is_writable($path)) {
+        if (is_string($path) && !is_writable($path)) {
             $this->io->error(sprintf('The path "%s" not writeable!', $path));
 
             return 1;
         }
 
         $planCalculator = $this->getDependencyFactory()->getMigrationPlanCalculator();
-        $plan           = $planCalculator->getPlanForVersions(array_map(static function (string $version): Version {
-            return new Version($version);
-        }, $versions), $direction);
+        $plan = $planCalculator->getPlanForVersions(
+            array_map(
+                static function (string $version): Version {
+                    return new Version($version);
+                },
+                $versions
+            ),
+            $direction
+        );
 
         $this->getDependencyFactory()->getLogger()->notice(
-            'Executing' . ($migratorConfiguration->isDryRun() ? ' (dry-run)' : '') . ' {versions} {direction}',
+            'Executing'.($migratorConfiguration->isDryRun() ? ' (dry-run)' : '').' {versions} {direction}',
             [
                 'direction' => $plan->getDirection(),
                 'versions' => implode(', ', $versions),
@@ -150,7 +157,7 @@ EOT
         );
 
         $migrator = $this->getDependencyFactory()->getMigrator();
-        $sql      = $migrator->migrate($plan, $migratorConfiguration);
+        $sql = $migrator->migrate($plan, $migratorConfiguration);
 
         if (is_string($path)) {
             $writer = $this->getDependencyFactory()->getQueryWriter();

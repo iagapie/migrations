@@ -56,11 +56,14 @@ final class ExecutionResult
     /** @var string */
     private $direction;
 
-    public function __construct(Version $version, string $direction = Direction::UP, ?DateTimeImmutable $executedAt = null)
-    {
+    public function __construct(
+        Version $version,
+        string $direction = Direction::UP,
+        ?DateTimeImmutable $executedAt = null
+    ) {
         $this->executedAt = $executedAt;
-        $this->version    = $version;
-        $this->direction  = $direction;
+        $this->version = $version;
+        $this->direction = $direction;
     }
 
     public function getDirection(): string
@@ -136,7 +139,7 @@ final class ExecutionResult
 
     public function setError(bool $error, ?Throwable $exception = null): void
     {
-        $this->error     = $error;
+        $this->error = $error;
         $this->exception = $exception;
     }
 

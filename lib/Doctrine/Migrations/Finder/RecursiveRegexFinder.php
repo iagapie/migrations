@@ -24,10 +24,10 @@ final class RecursiveRegexFinder extends Finder
     public function __construct(?string $pattern = null)
     {
         $this->pattern = $pattern ?? sprintf(
-            '#^.+\\%s[^\\%s]+\\.php$#i',
-            DIRECTORY_SEPARATOR,
-            DIRECTORY_SEPARATOR
-        );
+                '#^.+\\%s[^\\%s]+\\.php$#i',
+                DIRECTORY_SEPARATOR,
+                DIRECTORY_SEPARATOR
+            );
     }
 
     /**
@@ -47,7 +47,9 @@ final class RecursiveRegexFinder extends Finder
     {
         return new RegexIterator(
             new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS | FilesystemIterator::FOLLOW_SYMLINKS),
+                new RecursiveDirectoryIterator(
+                    $dir, FilesystemIterator::SKIP_DOTS | FilesystemIterator::FOLLOW_SYMLINKS
+                ),
                 RecursiveIteratorIterator::LEAVES_ONLY
             ),
             $this->getPattern(),

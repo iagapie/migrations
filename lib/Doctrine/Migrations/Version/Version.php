@@ -21,6 +21,7 @@ final class Version
 
     /**
      * @param mixed $object
+     * @return bool
      */
     public function equals($object): bool
     {

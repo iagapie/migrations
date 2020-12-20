@@ -72,7 +72,8 @@ final class VersionCommand extends DoctrineCommand
                 InputOption::VALUE_OPTIONAL,
                 'Apply to specified version.'
             )
-            ->setHelp(<<<EOT
+            ->setHelp(
+                <<<EOT
 The <info>%command.name%</info> command allows you to manually add, delete or synchronize migration versions from the version table:
 
     <info>%command.full_name% MIGRATION-FQCN --add</info>
@@ -106,7 +107,9 @@ EOT
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if ($input->getOption('add') === false && $input->getOption('delete') === false) {
-            throw InvalidOptionUsage::new('You must specify whether you want to --add or --delete the specified version.');
+            throw InvalidOptionUsage::new(
+                'You must specify whether you want to --add or --delete the specified version.'
+            );
         }
 
         $this->markMigrated = $input->getOption('add');
@@ -134,9 +137,9 @@ EOT
     private function markVersions(InputInterface $input, OutputInterface $output): void
     {
         $affectedVersion = $input->getArgument('version');
-        $allOption       = $input->getOption('all');
+        $allOption = $input->getOption('all');
         $rangeFromOption = $input->getOption('range-from');
-        $rangeToOption   = $input->getOption('range-to');
+        $rangeToOption = $input->getOption('range-to');
 
         if ($allOption === true && ($rangeFromOption !== null || $rangeToOption !== null)) {
             throw InvalidOptionUsage::new(
@@ -151,31 +154,31 @@ EOT
         }
 
         $executedMigrations = $this->getDependencyFactory()->getMetadataStorage()->getExecutedMigrations();
-        $availableVersions  = $this->getDependencyFactory()->getMigrationPlanCalculator()->getMigrations();
+        $availableVersions = $this->getDependencyFactory()->getMigrationPlanCalculator()->getMigrations();
         if ($allOption === true) {
             if ($input->getOption('delete') === true) {
                 foreach ($executedMigrations->getItems() as $availableMigration) {
-                    $this->mark($input, $output, $availableMigration->getVersion(), false, $executedMigrations);
+                    $this->mark($input, $availableMigration->getVersion(), false, $executedMigrations);
                 }
             }
 
             foreach ($availableVersions->getItems() as $availableMigration) {
-                $this->mark($input, $output, $availableMigration->getVersion(), true, $executedMigrations);
+                $this->mark($input, $availableMigration->getVersion(), true, $executedMigrations);
             }
         } elseif ($affectedVersion !== null) {
-            $this->mark($input, $output, new Version($affectedVersion), false, $executedMigrations);
+            $this->mark($input, new Version($affectedVersion), false, $executedMigrations);
         } elseif ($rangeFromOption !== null && $rangeToOption !== null) {
             $migrate = false;
             foreach ($availableVersions->getItems() as $availableMigration) {
-                if ((string) $availableMigration->getVersion() === $rangeFromOption) {
+                if ((string)$availableMigration->getVersion() === $rangeFromOption) {
                     $migrate = true;
                 }
 
                 if ($migrate) {
-                    $this->mark($input, $output, $availableMigration->getVersion(), true, $executedMigrations);
+                    $this->mark($input, $availableMigration->getVersion(), true, $executedMigrations);
                 }
 
-                if ((string) $availableMigration->getVersion() === $rangeToOption) {
+                if ((string)$availableMigration->getVersion() === $rangeToOption) {
                     break;
                 }
             }
@@ -189,8 +192,12 @@ EOT
      * @throws VersionDoesNotExist
      * @throws UnknownMigrationVersion
      */
-    private function mark(InputInterface $input, OutputInterface $output, Version $version, bool $all, ExecutedMigrationsList $executedMigrations): void
-    {
+    private function mark(
+        InputInterface $input,
+        Version $version,
+        bool $all,
+        ExecutedMigrationsList $executedMigrations
+    ): void {
         try {
             $availableMigration = $this->getDependencyFactory()->getMigrationRepository()->getMigration($version);
         } catch (MigrationClassNotFound $e) {
@@ -200,11 +207,11 @@ EOT
         $storage = $this->getDependencyFactory()->getMetadataStorage();
         if ($availableMigration === null) {
             if ($input->getOption('delete') === false) {
-                throw UnknownMigrationVersion::new((string) $version);
+                throw UnknownMigrationVersion::new((string)$version);
             }
 
             $question =
-                'WARNING! You are about to delete a migration version from the version table that has no corresponding migration file.' .
+                'WARNING! You are about to delete a migration version from the version table that has no corresponding migration file.'.
                 'Do you want to delete this migration from the migrations table?';
 
             $confirmation = $this->io->confirm($question);
@@ -212,10 +219,12 @@ EOT
             if ($confirmation) {
                 $migrationResult = new ExecutionResult($version, Direction::DOWN);
                 $storage->complete($migrationResult);
-                $this->io->text(sprintf(
-                    "<info>%s</info> deleted from the version table.\n",
-                    (string) $version
-                ));
+                $this->io->text(
+                    sprintf(
+                        "<info>%s</info> deleted from the version table.\n",
+                        (string)$version
+                    )
+                );
 
                 return;
             }
@@ -224,15 +233,15 @@ EOT
         $marked = false;
 
         if ($this->markMigrated && $executedMigrations->hasMigration($version)) {
-            if (! $all) {
+            if (!$all) {
                 throw VersionAlreadyExists::new($version);
             }
 
             $marked = true;
         }
 
-        if (! $this->markMigrated && ! $executedMigrations->hasMigration($version)) {
-            if (! $all) {
+        if (!$this->markMigrated && !$executedMigrations->hasMigration($version)) {
+            if (!$all) {
                 throw VersionDoesNotExist::new($version);
             }
 
@@ -247,18 +256,22 @@ EOT
             $migrationResult = new ExecutionResult($version, Direction::UP);
             $storage->complete($migrationResult);
 
-            $this->io->text(sprintf(
-                "<info>%s</info> added to the version table.\n",
-                (string) $version
-            ));
+            $this->io->text(
+                sprintf(
+                    "<info>%s</info> added to the version table.\n",
+                    (string)$version
+                )
+            );
         } else {
             $migrationResult = new ExecutionResult($version, Direction::DOWN);
             $storage->complete($migrationResult);
 
-            $this->io->text(sprintf(
-                "<info>%s</info> deleted from the version table.\n",
-                (string) $version
-            ));
+            $this->io->text(
+                sprintf(
+                    "<info>%s</info> deleted from the version table.\n",
+                    (string)$version
+                )
+            );
         }
     }
 }

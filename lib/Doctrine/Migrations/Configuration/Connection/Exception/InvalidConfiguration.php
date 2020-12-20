@@ -19,6 +19,12 @@ final class InvalidConfiguration extends InvalidArgumentException implements Loa
 
     public static function invalidConnectionType(object $connection): self
     {
-        return new self(sprintf('The returned connection must be a %s instance, %s returned.', Connection::class, get_class($connection)));
+        return new self(
+            sprintf(
+                'The returned connection must be a %s instance, %s returned.',
+                Connection::class,
+                get_class($connection)
+            )
+        );
     }
 }

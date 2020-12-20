@@ -29,7 +29,7 @@ final class CurrentMigrationStatusCalculator implements MigrationStatusCalculato
         MetadataStorage $metadataStorage
     ) {
         $this->migrationPlanCalculator = $migrationPlanCalculator;
-        $this->metadataStorage         = $metadataStorage;
+        $this->metadataStorage = $metadataStorage;
     }
 
     public function getExecutedUnavailableMigrations(): ExecutedMigrationsList
@@ -37,9 +37,14 @@ final class CurrentMigrationStatusCalculator implements MigrationStatusCalculato
         $executedMigrations = $this->metadataStorage->getExecutedMigrations();
         $availableMigration = $this->migrationPlanCalculator->getMigrations();
 
-        return new ExecutedMigrationsList(array_filter($executedMigrations->getItems(), static function (ExecutedMigration $migrationInfo) use ($availableMigration): bool {
-            return ! $availableMigration->hasMigration($migrationInfo->getVersion());
-        }));
+        return new ExecutedMigrationsList(
+            array_filter(
+                $executedMigrations->getItems(),
+                static function (ExecutedMigration $migrationInfo) use ($availableMigration): bool {
+                    return !$availableMigration->hasMigration($migrationInfo->getVersion());
+                }
+            )
+        );
     }
 
     public function getNewMigrations(): AvailableMigrationsList
@@ -47,8 +52,13 @@ final class CurrentMigrationStatusCalculator implements MigrationStatusCalculato
         $executedMigrations = $this->metadataStorage->getExecutedMigrations();
         $availableMigration = $this->migrationPlanCalculator->getMigrations();
 
-        return new AvailableMigrationsList(array_filter($availableMigration->getItems(), static function (AvailableMigration $migrationInfo) use ($executedMigrations): bool {
-            return ! $executedMigrations->hasMigration($migrationInfo->getVersion());
-        }));
+        return new AvailableMigrationsList(
+            array_filter(
+                $availableMigration->getItems(),
+                static function (AvailableMigration $migrationInfo) use ($executedMigrations): bool {
+                    return !$executedMigrations->hasMigration($migrationInfo->getVersion());
+                }
+            )
+        );
     }
 }

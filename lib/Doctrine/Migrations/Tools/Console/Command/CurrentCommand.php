@@ -32,22 +32,24 @@ final class CurrentCommand extends DoctrineCommand
         $aliasResolver = $this->getDependencyFactory()->getVersionAliasResolver();
 
         $version = $aliasResolver->resolveVersionAlias('current');
-        if ((string) $version === '0') {
+        if ((string)$version === '0') {
             $description = '(No migration executed yet)';
         } else {
             try {
                 $availableMigration = $this->getDependencyFactory()->getMigrationRepository()->getMigration($version);
-                $description        = $availableMigration->getMigration()->getDescription();
+                $description = $availableMigration->getMigration()->getDescription();
             } catch (MigrationClassNotFound $e) {
                 $description = '(Migration info not available)';
             }
         }
 
-        $this->io->text(sprintf(
-            "<info>%s</info>%s\n",
-            (string) $version,
-            $description !== '' ? ' - ' . $description : ''
-        ));
+        $this->io->text(
+            sprintf(
+                "<info>%s</info>%s\n",
+                (string)$version,
+                $description !== '' ? ' - '.$description : ''
+            )
+        );
 
         return 0;
     }

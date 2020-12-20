@@ -15,6 +15,8 @@ interface MigrationPlanCalculator
 {
     /**
      * @param Version[] $versions
+     * @param string $direction
+     * @return MigrationPlanList
      */
     public function getPlanForVersions(array $versions, string $direction): MigrationPlanList;
 

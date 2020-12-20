@@ -13,10 +13,6 @@ use Doctrine\DBAL\Schema\Schema;
  * represents the current state of your database. A clone of this Schema instance is passed to each of your migrations
  * so that you can manipulate the Schema object. Your manipulated Schema object is then compared to the original Schema
  * object to produce the SQL statements that need to be executed.
- *
- * @internal
- *
- * @see Doctrine\Migrations\Version\DbalExecutor
  */
 class DBALSchemaDiffProvider implements SchemaDiffProvider
 {
@@ -29,7 +25,7 @@ class DBALSchemaDiffProvider implements SchemaDiffProvider
     public function __construct(AbstractSchemaManager $schemaManager, AbstractPlatform $platform)
     {
         $this->schemaManager = $schemaManager;
-        $this->platform      = $platform;
+        $this->platform = $platform;
     }
 
     public function createFromSchema(): Schema

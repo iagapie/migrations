@@ -28,8 +28,8 @@ final class ExecutedMigration
 
     public function __construct(Version $version, ?DateTimeImmutable $executedAt = null, ?float $executionTime = null)
     {
-        $this->version       = $version;
-        $this->executedAt    = $executedAt;
+        $this->version = $version;
+        $this->executedAt = $executedAt;
         $this->executionTime = $executionTime;
     }
 

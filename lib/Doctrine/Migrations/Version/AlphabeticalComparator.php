@@ -10,6 +10,6 @@ final class AlphabeticalComparator implements Comparator
 {
     public function compare(Version $a, Version $b): int
     {
-        return strcmp((string) $a, (string) $b);
+        return strcmp((string)$a, (string)$b);
     }
 }

@@ -8,11 +8,6 @@ use Doctrine\DBAL\Schema\Schema;
 
 /**
  * The MigratorConfiguration class is responsible for defining the configuration for a migration.
- *
- * @internal
- *
- * @see Doctrine\Migrations\DbalMigrator
- * @see Doctrine\Migrations\Version\DbalExecutor
  */
 class MigratorConfiguration
 {

@@ -404,7 +404,6 @@ class MigrateCommandTest extends MigrationTestCase
         $output = $this->migrateCommandTester->getDisplay(true);
 
         self::assertStringContainsString('[WARNING] You have 1 previously executed migrations in the database that are not registered migrations.', $output);
-        self::assertStringContainsString('WARNING! You are about to execute a migration in database "<unnamed>" that could result in schema changes and data loss. Are you sure you wish to continue?', $output);
         self::assertStringContainsString('[ERROR] Migration cancelled!', $output);
 
         self::assertSame(3, $this->migrateCommandTester->getStatusCode());
@@ -424,7 +423,6 @@ class MigrateCommandTest extends MigrationTestCase
 
         $output = $this->migrateCommandTester->getDisplay(true);
 
-        self::assertStringContainsString('WARNING! You are about to execute a migration in database "<unnamed>" that could result in schema changes and data loss. Are you sure you wish to continue?', $output);
         self::assertStringContainsString('[ERROR] Migration cancelled!', $output);
 
         self::assertSame(3, $this->migrateCommandTester->getStatusCode());

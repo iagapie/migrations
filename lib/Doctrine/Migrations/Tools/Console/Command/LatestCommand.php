@@ -32,19 +32,21 @@ final class LatestCommand extends DoctrineCommand
         $aliasResolver = $this->getDependencyFactory()->getVersionAliasResolver();
 
         try {
-            $version            = $aliasResolver->resolveVersionAlias('latest');
+            $version = $aliasResolver->resolveVersionAlias('latest');
             $availableMigration = $this->getDependencyFactory()->getMigrationRepository()->getMigration($version);
-            $description        = $availableMigration->getMigration()->getDescription();
+            $description = $availableMigration->getMigration()->getDescription();
         } catch (NoMigrationsToExecute $e) {
-            $version     = '0';
+            $version = '0';
             $description = '';
         }
 
-        $this->io->text(sprintf(
-            "<info>%s</info>%s\n",
-            $version,
-            $description !== '' ? ' - ' . $description : ''
-        ));
+        $this->io->text(
+            sprintf(
+                "<info>%s</info>%s\n",
+                $version,
+                $description !== '' ? ' - '.$description : ''
+            )
+        );
 
         return 0;
     }

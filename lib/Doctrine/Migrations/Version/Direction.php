@@ -11,7 +11,7 @@ namespace Doctrine\Migrations\Version;
  */
 final class Direction
 {
-    public const UP   = 'up';
+    public const UP = 'up';
     public const DOWN = 'down';
 
     /**

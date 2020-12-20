@@ -8,17 +8,12 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\Migrations\Configuration\Configuration;
 use Doctrine\Migrations\Configuration\Connection\ExistingConnection;
-use Doctrine\Migrations\Configuration\EntityManager\ExistingEntityManager;
 use Doctrine\Migrations\Configuration\Migration\ExistingConfiguration;
 use Doctrine\Migrations\DependencyFactory;
 use Doctrine\Migrations\Exception\FrozenDependencies;
-use Doctrine\Migrations\Exception\MissingDependency;
 use Doctrine\Migrations\Finder\GlobFinder;
 use Doctrine\Migrations\Finder\RecursiveRegexFinder;
 use Doctrine\Migrations\Metadata\Storage\TableMetadataStorageConfiguration;
-use Doctrine\Migrations\Provider\OrmSchemaProvider;
-use Doctrine\Migrations\Provider\SchemaProvider;
-use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use stdClass;
@@ -31,18 +26,9 @@ final class DependencyFactoryTest extends MigrationTestCase
     /** @var Configuration */
     private $configuration;
 
-    /** @var EntityManager|MockObject */
-    private $entityManager;
-
     public function setUp(): void
     {
         $this->connection    = $this->createMock(Connection::class);
-        $this->entityManager = $this->createMock(EntityManager::class);
-        $this->entityManager
-            ->expects(self::any())
-            ->method('getConnection')
-            ->willReturn($this->connection);
-
         $this->configuration = new Configuration();
     }
 
@@ -105,66 +91,7 @@ final class DependencyFactoryTest extends MigrationTestCase
         $di = DependencyFactory::fromConnection(new ExistingConfiguration($this->configuration), new ExistingConnection($this->connection));
 
         self::assertSame($this->connection, $di->getConnection());
-        self::assertFalse($di->hasEntityManager());
         self::assertTrue($di->isFrozen());
-    }
-
-    public function testNoEntityManagerRaiseException(): void
-    {
-        $this->expectException(MissingDependency::class);
-
-        $di = DependencyFactory::fromConnection(new ExistingConfiguration($this->configuration), new ExistingConnection($this->connection));
-        $di->getEntityManager();
-    }
-
-    public function testEntityManager(): void
-    {
-        $di = DependencyFactory::fromEntityManager(new ExistingConfiguration($this->configuration), new ExistingEntityManager($this->entityManager));
-
-        self::assertTrue($di->hasEntityManager());
-        self::assertSame($this->entityManager, $di->getEntityManager());
-        self::assertSame($this->connection, $di->getConnection());
-        self::assertTrue($di->isFrozen());
-    }
-
-    public function testNoSchemaProviderRaiseException(): void
-    {
-        $di = DependencyFactory::fromConnection(new ExistingConfiguration($this->configuration), new ExistingConnection($this->connection));
-        self::assertFalse($di->hasSchemaProvider());
-
-        $this->expectException(MissingDependency::class);
-        $di->getSchemaProvider();
-    }
-
-    public function testSchemaProviderFromEntityManager(): void
-    {
-        $di = DependencyFactory::fromEntityManager(new ExistingConfiguration($this->configuration), new ExistingEntityManager($this->entityManager));
-
-        self::assertTrue($di->hasSchemaProvider());
-        self::assertEquals(new OrmSchemaProvider($this->entityManager), $di->getSchemaProvider());
-        self::assertTrue($di->isFrozen());
-    }
-
-    public function testSchemaProviderFromManualService(): void
-    {
-        $schemaProvider = $this->createMock(SchemaProvider::class);
-        $di             = DependencyFactory::fromConnection(new ExistingConfiguration($this->configuration), new ExistingConnection($this->connection));
-        $di->setService(SchemaProvider::class, $schemaProvider);
-
-        self::assertTrue($di->hasSchemaProvider());
-        self::assertSame($schemaProvider, $di->getSchemaProvider());
-        self::assertFalse($di->isFrozen());
-    }
-
-    public function testProvidedSchemaProviderHasPrecedenceOverProviderFromEntityManagerConfig(): void
-    {
-        $schemaProvider = $this->createMock(SchemaProvider::class);
-        $di             = DependencyFactory::fromEntityManager(new ExistingConfiguration($this->configuration), new ExistingEntityManager($this->entityManager));
-        $di->setService(SchemaProvider::class, $schemaProvider);
-
-        self::assertTrue($di->hasSchemaProvider());
-        self::assertSame($schemaProvider, $di->getSchemaProvider());
-        self::assertFalse($di->isFrozen());
     }
 
     public function testCustomLogger(): void

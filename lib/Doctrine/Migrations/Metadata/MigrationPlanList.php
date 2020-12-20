@@ -27,7 +27,7 @@ final class MigrationPlanList implements Countable
      */
     public function __construct(array $items, string $direction)
     {
-        $this->items     = $items;
+        $this->items = $items;
         $this->direction = $direction;
     }
 

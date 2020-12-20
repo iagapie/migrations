@@ -24,8 +24,11 @@ final class RollupCommand extends DoctrineCommand
 
         $this
             ->setAliases(['rollup'])
-            ->setDescription('Rollup migrations by deleting all tracked versions and insert the one version that exists.')
-            ->setHelp(<<<EOT
+            ->setDescription(
+                'Rollup migrations by deleting all tracked versions and insert the one version that exists.'
+            )
+            ->setHelp(
+                <<<EOT
 The <info>%command.name%</info> command rolls up migrations by deleting all tracked versions and
 inserts the one version that exists that was created with the <info>migrations:dump-schema</info> command.
 
@@ -43,7 +46,7 @@ EOT
             $this->getDependencyFactory()->getConnection()->getDatabase() ?? '<unnamed>'
         );
 
-        if (! $this->canExecute($question, $input)) {
+        if (!$this->canExecute($question, $input)) {
             $this->io->error('Migration cancelled!');
 
             return 3;
@@ -52,10 +55,12 @@ EOT
         $this->getDependencyFactory()->getMetadataStorage()->ensureInitialized();
         $version = $this->getDependencyFactory()->getRollup()->rollup();
 
-        $this->io->success(sprintf(
-            'Rolled up migrations to version %s',
-            (string) $version
-        ));
+        $this->io->success(
+            sprintf(
+                'Rolled up migrations to version %s',
+                (string)$version
+            )
+        );
 
         return 0;
     }

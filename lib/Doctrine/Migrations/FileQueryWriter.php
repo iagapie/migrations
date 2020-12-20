@@ -32,11 +32,15 @@ final class FileQueryWriter implements QueryWriter
         LoggerInterface $logger
     ) {
         $this->migrationFileBuilder = $migrationFileBuilder;
-        $this->logger               = $logger;
+        $this->logger = $logger;
     }
 
     /**
-     * @param array<string,Query[]> $queriesByVersion
+     * @param string $path
+     * @param string $direction
+     * @param array<string, Query[]> $queriesByVersion
+     * @param DateTimeInterface|null $now
+     * @return bool
      */
     public function write(
         string $path,
@@ -59,8 +63,8 @@ final class FileQueryWriter implements QueryWriter
     private function buildMigrationFilePath(string $path, DateTimeInterface $now): string
     {
         if (is_dir($path)) {
-            $path  = realpath($path);
-            $path .= '/doctrine_migration_' . $now->format('YmdHis') . '.sql';
+            $path = realpath($path);
+            $path .= '/doctrine_migration_'.$now->format('YmdHis').'.sql';
         }
 
         return $path;

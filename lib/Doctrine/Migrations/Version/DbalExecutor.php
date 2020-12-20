@@ -66,13 +66,13 @@ final class DbalExecutor implements Executor
         ParameterFormatter $parameterFormatter,
         Stopwatch $stopwatch
     ) {
-        $this->connection         = $connection;
-        $this->schemaProvider     = $schemaProvider;
+        $this->connection = $connection;
+        $this->schemaProvider = $schemaProvider;
         $this->parameterFormatter = $parameterFormatter;
-        $this->stopwatch          = $stopwatch;
-        $this->metadataStorage    = $metadataStorage;
-        $this->logger             = $logger;
-        $this->dispatcher         = $dispatcher;
+        $this->stopwatch = $stopwatch;
+        $this->metadataStorage = $metadataStorage;
+        $this->logger = $logger;
+        $this->dispatcher = $dispatcher;
     }
 
     /**
@@ -131,7 +131,7 @@ final class DbalExecutor implements Executor
             $configuration
         );
 
-        if (! $plan->getMigration()->isTransactional()) {
+        if (!$plan->getMigration()->isTransactional()) {
             return;
         }
 
@@ -153,7 +153,7 @@ final class DbalExecutor implements Executor
 
         $fromSchema = $this->getFromSchema($configuration);
 
-        $migration->{'pre' . ucfirst($direction)}($fromSchema);
+        $migration->{'pre'.ucfirst($direction)}($fromSchema);
 
         $this->logger->info(...$this->getMigrationHeader($plan, $migration, $direction));
 
@@ -174,7 +174,7 @@ final class DbalExecutor implements Executor
         }
 
         if (count($this->sql) !== 0) {
-            if (! $configuration->isDryRun()) {
+            if (!$configuration->isDryRun()) {
                 $this->executeResult($configuration);
             } else {
                 foreach ($this->sql as $query) {
@@ -182,24 +182,27 @@ final class DbalExecutor implements Executor
                 }
             }
         } else {
-            $this->logger->warning('Migration {version} was executed but did not result in any SQL statements.', [
-                'version' => (string) $plan->getVersion(),
-            ]);
+            $this->logger->warning(
+                'Migration {version} was executed but did not result in any SQL statements.',
+                [
+                    'version' => (string)$plan->getVersion(),
+                ]
+            );
         }
 
         $result->setState(State::POST);
 
-        $migration->{'post' . ucfirst($direction)}($toSchema);
+        $migration->{'post'.ucfirst($direction)}($toSchema);
 
         $stopwatchEvent->stop();
-        $periods    = $stopwatchEvent->getPeriods();
+        $periods = $stopwatchEvent->getPeriods();
         $lastPeriod = $periods[count($periods) - 1];
 
-        $result->setTime((float) $lastPeriod->getDuration() / 1000);
+        $result->setTime((float)$lastPeriod->getDuration() / 1000);
         $result->setMemory($lastPeriod->getMemory());
 
         $params = [
-            'version' => (string) $plan->getVersion(),
+            'version' => (string)$plan->getVersion(),
             'time' => $lastPeriod->getDuration(),
             'memory' => BytesFormatter::formatBytes($lastPeriod->getMemory()),
             'direction' => $direction === Direction::UP ? 'migrated' : 'reverted',
@@ -207,11 +210,11 @@ final class DbalExecutor implements Executor
 
         $this->logger->info('Migration {version} {direction} (took {time}ms, used {memory} memory)', $params);
 
-        if (! $configuration->isDryRun()) {
+        if (!$configuration->isDryRun()) {
             $this->metadataStorage->complete($result);
         }
 
-        if ($migration->isTransactional()) {
+        if ($migration->isTransactional() && !$this->connection->isAutoCommit()) {
             //commit only if running in transactional mode
             $this->connection->commit();
         }
@@ -233,11 +236,11 @@ final class DbalExecutor implements Executor
      */
     private function getMigrationHeader(MigrationPlan $planItem, AbstractMigration $migration, string $direction): array
     {
-        $versionInfo = (string) $planItem->getVersion();
+        $versionInfo = (string)$planItem->getVersion();
         $description = $migration->getDescription();
 
         if ($description !== '') {
-            $versionInfo .= ' (' . $description . ')';
+            $versionInfo .= ' ('.$description.')';
         }
 
         $params = ['version_name' => $versionInfo];
@@ -249,8 +252,12 @@ final class DbalExecutor implements Executor
         return ['++ reverting {version_name}', $params];
     }
 
-    private function migrationEnd(Throwable $e, MigrationPlan $plan, ExecutionResult $result, MigratorConfiguration $configuration): void
-    {
+    private function migrationEnd(
+        Throwable $e,
+        MigrationPlan $plan,
+        ExecutionResult $result,
+        MigratorConfiguration $configuration
+    ): void {
         $migration = $plan->getMigration();
         if ($migration->isTransactional()) {
             //only rollback transaction if in transactional mode
@@ -273,7 +280,7 @@ final class DbalExecutor implements Executor
             $this->logger->error(
                 'Migration {version} skipped during {state}. Reason: "{reason}"',
                 [
-                    'version' => (string) $plan->getVersion(),
+                    'version' => (string)$plan->getVersion(),
                     'reason' => $e->getMessage(),
                     'state' => $this->getExecutionStateAsString($result->getState()),
                 ]
@@ -282,7 +289,7 @@ final class DbalExecutor implements Executor
             $this->logger->error(
                 'Migration {version} failed during {state}. Error: "{error}"',
                 [
-                    'version' => (string) $plan->getVersion(),
+                    'version' => (string)$plan->getVersion(),
                     'error' => $e->getMessage(),
                     'state' => $this->getExecutionStateAsString($result->getState()),
                 ]
@@ -300,13 +307,16 @@ final class DbalExecutor implements Executor
             $this->connection->executeQuery($query->getStatement(), $query->getParameters(), $query->getTypes());
             $stopwatchEvent->stop();
 
-            if (! $configuration->getTimeAllQueries()) {
+            if (!$configuration->getTimeAllQueries()) {
                 continue;
             }
 
-            $this->logger->notice('Query took {duration}ms', [
-                'duration' => $stopwatchEvent->getDuration(),
-            ]);
+            $this->logger->notice(
+                'Query took {duration}ms',
+                [
+                    'duration' => $stopwatchEvent->getDuration(),
+                ]
+            );
         }
     }
 
@@ -321,7 +331,7 @@ final class DbalExecutor implements Executor
             $configuration->getTimeAllQueries() ? LogLevel::NOTICE : LogLevel::DEBUG,
             '{query} {params}',
             [
-                'query'  => $query->getStatement(),
+                'query' => $query->getStatement(),
                 'params' => $params,
             ]
         );

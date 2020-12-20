@@ -10,8 +10,6 @@ use Psr\Log\LoggerInterface;
 
 /**
  * The DbalMigrationFactory class is responsible for creating instances of a migration class name for a DBAL connection.
- *
- * @var internal
  */
 final class DbalMigrationFactory implements MigrationFactory
 {
@@ -24,7 +22,7 @@ final class DbalMigrationFactory implements MigrationFactory
     public function __construct(Connection $connection, LoggerInterface $logger)
     {
         $this->connection = $connection;
-        $this->logger     = $logger;
+        $this->logger = $logger;
     }
 
     public function createVersion(string $migrationClassName): AbstractMigration

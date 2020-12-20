@@ -30,7 +30,8 @@ final class ListCommand extends DoctrineCommand
         $this
             ->setAliases(['list-migrations'])
             ->setDescription('Display a list of all available migrations and their status.')
-            ->setHelp(<<<EOT
+            ->setHelp(
+                <<<EOT
 The <info>%command.name%</info> command outputs a list of all available migrations and their status:
 
     <info>%command.full_name%</info>
@@ -55,22 +56,33 @@ EOT
     /**
      * @return Version[]
      */
-    private function getSortedVersions(AvailableMigrationsList $availableMigrations, ExecutedMigrationsList $executedMigrations): array
-    {
-        $availableVersions = array_map(static function (AvailableMigration $availableMigration): Version {
-            return $availableMigration->getVersion();
-        }, $availableMigrations->getItems());
+    private function getSortedVersions(
+        AvailableMigrationsList $availableMigrations,
+        ExecutedMigrationsList $executedMigrations
+    ): array {
+        $availableVersions = array_map(
+            static function (AvailableMigration $availableMigration): Version {
+                return $availableMigration->getVersion();
+            },
+            $availableMigrations->getItems()
+        );
 
-        $executedVersions = array_map(static function (ExecutedMigration $executedMigration): Version {
-            return $executedMigration->getVersion();
-        }, $executedMigrations->getItems());
+        $executedVersions = array_map(
+            static function (ExecutedMigration $executedMigration): Version {
+                return $executedMigration->getVersion();
+            },
+            $executedMigrations->getItems()
+        );
 
         $versions = array_unique(array_merge($availableVersions, $executedVersions));
 
         $comparator = $this->getDependencyFactory()->getVersionComparator();
-        uasort($versions, static function (Version $a, Version $b) use ($comparator): int {
-            return $comparator->compare($a, $b);
-        });
+        uasort(
+            $versions,
+            static function (Version $a, Version $b) use ($comparator): int {
+                return $comparator->compare($a, $b);
+            }
+        );
 
         return $versions;
     }

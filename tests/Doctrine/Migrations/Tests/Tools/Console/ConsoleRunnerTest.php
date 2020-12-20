@@ -6,12 +6,10 @@ namespace Doctrine\Migrations\Tests\Tools\Console;
 
 use Doctrine\Migrations\DependencyFactory;
 use Doctrine\Migrations\Tools\Console\ConsoleRunner;
-use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\HelperSet;
 
 use function chdir;
 use function getcwd;
@@ -25,66 +23,6 @@ class ConsoleRunnerTest extends TestCase
 {
     /** @var Application */
     private $application;
-
-    public function testCreateDependencyFactoryFromLegacyDbalHelper(): void
-    {
-        $dir = getcwd();
-        if ($dir === false) {
-            $dir = '.';
-        }
-
-        chdir(__DIR__ . '/legacy-config-dbal');
-
-        try {
-            $dependencyFactory = ConsoleRunnerStub::findDependencyFactory();
-            self::assertInstanceOf(DependencyFactory::class, $dependencyFactory);
-            self::assertSame('sqlite', $dependencyFactory->getConnection()->getDatabasePlatform()->getName());
-        } finally {
-            chdir($dir);
-        }
-    }
-
-    public function testCreateDependencyFactoryFromLegacyOrmHelper(): void
-    {
-        $dir = getcwd();
-        if ($dir === false) {
-            $dir = '.';
-        }
-
-        chdir(__DIR__ . '/legacy-config-orm');
-
-        try {
-            $dependencyFactory = ConsoleRunnerStub::findDependencyFactory();
-            self::assertInstanceOf(DependencyFactory::class, $dependencyFactory);
-            self::assertSame('sqlite', $dependencyFactory->getConnection()->getDatabasePlatform()->getName());
-            self::assertInstanceOf(EntityManager::class, $dependencyFactory->getEntityManager());
-        } finally {
-            chdir($dir);
-        }
-    }
-
-    public function testCreateDependencyFactoryFromWrongLegacyHelper(): void
-    {
-        $this->expectException(RuntimeException::class);
-
-        $dir = getcwd();
-        if ($dir === false) {
-            $dir = '.';
-        }
-
-        chdir(__DIR__ . '/legacy-config-wrong');
-
-        $this->expectExceptionMessage(sprintf(
-            'Configuration HelperSet returned by "%s" does not have a valid "em" or the "db" helper.',
-            realpath(__DIR__ . '/legacy-config-wrong/cli-config.php')
-        ));
-
-        try {
-            $dependencyFactory = ConsoleRunnerStub::findDependencyFactory();
-        } finally {
-            chdir($dir);
-        }
-    }
 
     /**
      * @dataProvider getDependencyFactoryTestDirectories
@@ -219,46 +157,11 @@ class ConsoleRunnerTest extends TestCase
         self::assertTrue($this->application->has('migrations:up-to-date'));
     }
 
-    public function testHasDiffCommand(): void
-    {
-        $dependencyFactory = $this->createMock(DependencyFactory::class);
-        $dependencyFactory
-            ->expects(self::atLeastOnce())
-            ->method('hasSchemaProvider')
-            ->willReturn(true);
-
-        ConsoleRunner::addCommands($this->application, $dependencyFactory);
-
-        self::assertTrue($this->application->has('migrations:diff'));
-    }
-
-    public function testNotHasDiffCommand(): void
-    {
-        $this->application->setHelperSet(new HelperSet([]));
-
-        ConsoleRunner::addCommands($this->application);
-
-        self::assertFalse($this->application->has('migrations:diff'));
-    }
-
     public function testCreateApplication(): void
     {
         $application = ConsoleRunner::createApplication();
         $commands    = $application->all('migrations');
         self::assertCount(12, $commands);
-    }
-
-    public function testCreateApplicationWithSchemaProvider(): void
-    {
-        $dependencyFactory = $this->createMock(DependencyFactory::class);
-        $dependencyFactory
-            ->expects(self::atLeastOnce())
-            ->method('hasSchemaProvider')
-            ->willReturn(true);
-
-        $application = ConsoleRunner::createApplication([], $dependencyFactory);
-        $commands    = $application->all('migrations');
-        self::assertCount(13, $commands);
     }
 
     protected function setUp(): void

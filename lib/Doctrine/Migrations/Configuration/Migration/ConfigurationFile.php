@@ -25,7 +25,7 @@ abstract class ConfigurationFile implements ConfigurationLoader
     final protected function getDirectoriesRelativeToFile(array $directories, string $file): array
     {
         foreach ($directories as $ns => $dir) {
-            $path = realpath(dirname($file) . '/' . $dir);
+            $path = realpath(dirname($file).'/'.$dir);
 
             $directories[$ns] = $path !== false ? $path : $dir;
         }

@@ -30,7 +30,7 @@ class Rollup
         MigrationsRepository $migrationRepository
     ) {
         $this->migrationRepository = $migrationRepository;
-        $this->metadataStorage     = $metadataStorage;
+        $this->metadataStorage = $metadataStorage;
     }
 
     /**

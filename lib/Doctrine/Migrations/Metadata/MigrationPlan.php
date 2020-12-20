@@ -25,7 +25,7 @@ final class MigrationPlan
 
     public function __construct(Version $version, AbstractMigration $migration, string $direction)
     {
-        $this->version   = $version;
+        $this->version = $version;
         $this->migration = $migration;
         $this->direction = $direction;
     }

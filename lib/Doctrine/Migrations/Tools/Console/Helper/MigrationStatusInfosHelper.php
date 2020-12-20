@@ -28,10 +28,6 @@ use function sprintf;
 /**
  * The MigrationStatusInfosHelper class is responsible for building the array of information used when displaying
  * the status of your migrations.
- *
- * @internal
- *
- * @see Doctrine\Migrations\Tools\Console\Command\StatusCommand
  */
 class MigrationStatusInfosHelper
 {
@@ -61,12 +57,12 @@ class MigrationStatusInfosHelper
         MigrationStatusCalculator $statusCalculator,
         MetadataStorage $metadataStorage
     ) {
-        $this->configuration           = $configuration;
-        $this->connection              = $connection;
-        $this->aliasResolver           = $aliasResolver;
+        $this->configuration = $configuration;
+        $this->connection = $connection;
+        $this->aliasResolver = $aliasResolver;
         $this->migrationPlanCalculator = $migrationPlanCalculator;
-        $this->metadataStorage         = $metadataStorage;
-        $this->statusCalculator        = $statusCalculator;
+        $this->metadataStorage = $metadataStorage;
+        $this->statusCalculator = $statusCalculator;
     }
 
     /**
@@ -81,18 +77,18 @@ class MigrationStatusInfosHelper
                 ['Migration', 'Status', 'Migrated At', 'Execution Time', 'Description'],
             ]
         );
-        $executedMigrations  = $this->metadataStorage->getExecutedMigrations();
+        $executedMigrations = $this->metadataStorage->getExecutedMigrations();
         $availableMigrations = $this->migrationPlanCalculator->getMigrations();
 
         foreach ($versions as $version) {
-            $description   = null;
-            $executedAt    = null;
+            $description = null;
+            $executedAt = null;
             $executionTime = null;
 
             if ($executedMigrations->hasMigration($version)) {
                 $executedMigration = $executedMigrations->getMigration($version);
-                $executionTime     = $executedMigration->getExecutionTime();
-                $executedAt        = $executedMigration->getExecutedAt() instanceof DateTimeInterface
+                $executionTime = $executedMigration->getExecutionTime();
+                $executedAt = $executedMigration->getExecutedAt() instanceof DateTimeInterface
                     ? $executedMigration->getExecutedAt()->format('Y-m-d H:i:s')
                     : null;
             }
@@ -109,13 +105,15 @@ class MigrationStatusInfosHelper
                 $status = '<comment>not migrated</comment>';
             }
 
-            $table->addRow([
-                (string) $version,
-                $status,
-                (string) $executedAt,
-                $executionTime !== null ? $executionTime . 's' : '',
-                $description,
-            ]);
+            $table->addRow(
+                [
+                    (string)$version,
+                    $status,
+                    (string)$executedAt,
+                    $executionTime !== null ? $executionTime.'s' : '',
+                    $description,
+                ]
+            );
         }
 
         $table->render();
@@ -123,10 +121,10 @@ class MigrationStatusInfosHelper
 
     public function showMigrationsInfo(OutputInterface $output): void
     {
-        $executedMigrations  = $this->metadataStorage->getExecutedMigrations();
+        $executedMigrations = $this->metadataStorage->getExecutedMigrations();
         $availableMigrations = $this->migrationPlanCalculator->getMigrations();
 
-        $newMigrations                 = $this->statusCalculator->getNewMigrations();
+        $newMigrations = $this->statusCalculator->getNewMigrations();
         $executedUnavailableMigrations = $this->statusCalculator->getExecutedUnavailableMigrations();
 
         $storage = $this->configuration->getMetadataStorageConfiguration();
@@ -155,9 +153,11 @@ class MigrationStatusInfosHelper
 
             'Migrations' => [
                 'Executed' => count($executedMigrations),
-                'Executed Unavailable' => count($executedUnavailableMigrations) > 0 ? ('<error>' . count($executedUnavailableMigrations) . '</error>') : '0',
+                'Executed Unavailable' => count($executedUnavailableMigrations) > 0 ? ('<error>'.count(
+                        $executedUnavailableMigrations
+                    ).'</error>') : '0',
                 'Available' => count($availableMigrations),
-                'New' => count($newMigrations) > 0 ? ('<question>' . count($newMigrations) . '</question>') : '0',
+                'New' => count($newMigrations) > 0 ? ('<question>'.count($newMigrations).'</question>') : '0',
             ],
             'Migration Namespaces' => $this->configuration->getMigrationDirectories(),
 
@@ -183,14 +183,14 @@ class MigrationStatusInfosHelper
                 continue;
             }
 
-            if (! $first) {
+            if (!$first) {
                 $table->addRow([new TableSeparator(['colspan' => 3])]);
             }
 
             $first = false;
             array_unshift(
                 $nsRows[0],
-                new TableCell('<info>' . $group . '</info>', ['rowspan' => count($dataValues)])
+                new TableCell('<info>'.$group.'</info>', ['rowspan' => count($dataValues)])
             );
             $table->addRows($nsRows);
         }
@@ -218,14 +218,14 @@ class MigrationStatusInfosHelper
         }
 
         // Before first version "virtual" version number
-        if ((string) $version === '0') {
+        if ((string)$version === '0') {
             return '<comment>0</comment>';
         }
 
         // Show normal version number
         return sprintf(
             '<comment>%s </comment>',
-            (string) $version
+            (string)$version
         );
     }
 }

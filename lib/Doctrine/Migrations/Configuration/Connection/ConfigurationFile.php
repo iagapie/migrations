@@ -32,7 +32,7 @@ final class ConfigurationFile implements ConnectionLoader
             throw new InvalidArgumentException('Only one connection is supported');
         }
 
-        if (! file_exists($this->filename)) {
+        if (!file_exists($this->filename)) {
             throw FileNotFound::new($this->filename);
         }
 

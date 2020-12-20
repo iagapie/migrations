@@ -32,9 +32,9 @@ final class Query
             throw InvalidArguments::wrongTypesArgumentCount($statement, count($parameters), count($types));
         }
 
-        $this->statement  = $statement;
+        $this->statement = $statement;
         $this->parameters = $parameters;
-        $this->types      = $types;
+        $this->types = $types;
     }
 
     public function __toString(): string

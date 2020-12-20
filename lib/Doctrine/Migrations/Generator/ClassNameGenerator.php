@@ -7,13 +7,13 @@ namespace Doctrine\Migrations\Generator;
 use DateTimeImmutable;
 use DateTimeZone;
 
-/*final */class ClassNameGenerator
+class ClassNameGenerator
 {
     public const VERSION_FORMAT = 'YmdHis';
 
     public function generateClassName(string $namespace): string
     {
-        return $namespace . '\\Version' . $this->generateVersionNumber();
+        return $namespace.'\\Version'.$this->generateVersionNumber();
     }
 
     private function generateVersionNumber(): string

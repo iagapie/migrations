@@ -6,8 +6,6 @@ namespace Doctrine\Migrations\Version;
 
 /**
  * The State class contains constants for the different states a migration can be in during execution.
- *
- * @internal
  */
 final class State
 {

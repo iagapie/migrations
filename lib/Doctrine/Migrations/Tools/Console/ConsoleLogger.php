@@ -30,7 +30,7 @@ use function strtr;
  */
 final class ConsoleLogger extends AbstractLogger
 {
-    public const INFO  = 'info';
+    public const INFO = 'info';
     public const ERROR = 'error';
 
     /** @var OutputInterface */
@@ -60,14 +60,14 @@ final class ConsoleLogger extends AbstractLogger
     ];
 
     /**
-     * @param array<string, int>    $verbosityLevelMap
+     * @param array<string, int> $verbosityLevelMap
      * @param array<string, string> $formatLevelMap
      */
     public function __construct(OutputInterface $output, array $verbosityLevelMap = [], array $formatLevelMap = [])
     {
-        $this->output            = $output;
+        $this->output = $output;
         $this->verbosityLevelMap = $verbosityLevelMap + $this->verbosityLevelMap;
-        $this->formatLevelMap    = $formatLevelMap + $this->formatLevelMap;
+        $this->formatLevelMap = $formatLevelMap + $this->formatLevelMap;
     }
 
     /**
@@ -75,7 +75,7 @@ final class ConsoleLogger extends AbstractLogger
      */
     public function log($level, $message, array $context = []): void
     {
-        if (! isset($this->verbosityLevelMap[$level])) {
+        if (!isset($this->verbosityLevelMap[$level])) {
             throw new InvalidArgumentException(sprintf('The log level "%s" does not exist.', $level));
         }
 
@@ -94,7 +94,15 @@ final class ConsoleLogger extends AbstractLogger
             return;
         }
 
-        $output->writeln(sprintf('<%1$s>[%2$s] %3$s</%1$s>', $this->formatLevelMap[$level], $level, $this->interpolate($message, $context)), $this->verbosityLevelMap[$level]);
+        $output->writeln(
+            sprintf(
+                '<%1$s>[%2$s] %3$s</%1$s>',
+                $this->formatLevelMap[$level],
+                $level,
+                $this->interpolate($message, $context)
+            ),
+            $this->verbosityLevelMap[$level]
+        );
     }
 
     /**
@@ -115,16 +123,16 @@ final class ConsoleLogger extends AbstractLogger
             } elseif ($val instanceof DateTimeInterface) {
                 $replacements["{{$key}}"] = $val->format(DateTime::RFC3339);
             } elseif (is_object($val)) {
-                $replacements["{{$key}}"] = '[object ' . get_class($val) . ']';
+                $replacements["{{$key}}"] = '[object '.get_class($val).']';
             } else {
-                $replacements["{{$key}}"] = '[' . gettype($val) . ']';
+                $replacements["{{$key}}"] = '['.gettype($val).']';
             }
 
-            if (! isset($replacements["{{$key}}"])) {
+            if (!isset($replacements["{{$key}}"])) {
                 continue;
             }
 
-            $replacements["{{$key}}"] = '<comment>' . $replacements["{{$key}}"] . '</comment>';
+            $replacements["{{$key}}"] = '<comment>'.$replacements["{{$key}}"].'</comment>';
         }
 
         return strtr($message, $replacements);

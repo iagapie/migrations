@@ -39,8 +39,10 @@ class FilesystemMigrationsRepository implements MigrationsRepository
     private $migrations = [];
 
     /**
-     * @param string[]              $classes
+     * @param string[] $classes
      * @param array<string, string> $migrationDirectories
+     * @param MigrationFinder $migrationFinder
+     * @param MigrationFactory $versionFactory
      */
     public function __construct(
         array $classes,
@@ -49,32 +51,36 @@ class FilesystemMigrationsRepository implements MigrationsRepository
         MigrationFactory $versionFactory
     ) {
         $this->migrationDirectories = $migrationDirectories;
-        $this->migrationFinder      = $migrationFinder;
-        $this->versionFactory       = $versionFactory;
+        $this->migrationFinder = $migrationFinder;
+        $this->versionFactory = $versionFactory;
 
         $this->registerMigrations($classes);
     }
 
     private function registerMigrationInstance(Version $version, AbstractMigration $migration): AvailableMigration
     {
-        if (isset($this->migrations[(string) $version])) {
+        if (isset($this->migrations[(string)$version])) {
             throw DuplicateMigrationVersion::new(
-                (string) $version,
-                (string) $version
+                (string)$version,
+                (string)$version
             );
         }
 
-        $this->migrations[(string) $version] = new AvailableMigration($version, $migration);
+        $this->migrations[(string)$version] = new AvailableMigration($version, $migration);
 
-        return $this->migrations[(string) $version];
+        return $this->migrations[(string)$version];
     }
 
-    /** @throws MigrationException */
+    /**
+     * @param string $migrationClassName
+     * @return AvailableMigration
+     * @throws MigrationException
+     */
     public function registerMigration(string $migrationClassName): AvailableMigration
     {
         $this->ensureMigrationClassExists($migrationClassName);
 
-        $version   = new Version($migrationClassName);
+        $version = new Version($migrationClassName);
         $migration = $this->versionFactory->createVersion($migrationClassName);
 
         return $this->registerMigrationInstance($version, $migration);
@@ -82,8 +88,8 @@ class FilesystemMigrationsRepository implements MigrationsRepository
 
     /**
      * @param string[] $migrations
-     *
      * @return AvailableMigration[]
+     * @throws MigrationException
      */
     private function registerMigrations(array $migrations): array
     {
@@ -107,11 +113,11 @@ class FilesystemMigrationsRepository implements MigrationsRepository
     {
         $this->loadMigrationsFromDirectories();
 
-        if (! isset($this->migrations[(string) $version])) {
-            throw MigrationClassNotFound::new((string) $version);
+        if (!isset($this->migrations[(string)$version])) {
+            throw MigrationClassNotFound::new((string)$version);
         }
 
-        return $this->migrations[(string) $version];
+        return $this->migrations[(string)$version];
     }
 
     /**
@@ -124,10 +130,12 @@ class FilesystemMigrationsRepository implements MigrationsRepository
         return new AvailableMigrationsSet($this->migrations);
     }
 
-    /** @throws MigrationException */
+    /**
+     * @param string $class
+     */
     private function ensureMigrationClassExists(string $class): void
     {
-        if (! class_exists($class)) {
+        if (!class_exists($class)) {
             throw MigrationClassNotFound::new($class);
         }
     }
@@ -143,11 +151,11 @@ class FilesystemMigrationsRepository implements MigrationsRepository
         $this->migrationsLoaded = true;
 
         foreach ($migrationDirectories as $namespace => $path) {
-                $migrations = $this->migrationFinder->findMigrations(
-                    $path,
-                    $namespace
-                );
-                $this->registerMigrations($migrations);
+            $migrations = $this->migrationFinder->findMigrations(
+                $path,
+                $namespace
+            );
+            $this->registerMigrations($migrations);
         }
     }
 }

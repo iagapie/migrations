@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Doctrine\Migrations;
 
+use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Doctrine\DBAL\Schema\Table;
@@ -30,10 +31,6 @@ use const PREG_RECURSION_LIMIT_ERROR;
 /**
  * The SchemaDumper class is responsible for dumping the current state of your database schema to a migration. This
  * is to be used in conjunction with the Rollup class.
- *
- * @internal
- *
- * @see Doctrine\Migrations\Rollup
  */
 class SchemaDumper
 {
@@ -53,6 +50,10 @@ class SchemaDumper
     private $excludedTablesRegexes;
 
     /**
+     * @param AbstractPlatform $platform
+     * @param AbstractSchemaManager $schemaManager
+     * @param Generator $migrationGenerator
+     * @param SqlGenerator $migrationSqlGenerator
      * @param string[] $excludedTablesRegexes
      */
     public function __construct(
@@ -62,17 +63,20 @@ class SchemaDumper
         SqlGenerator $migrationSqlGenerator,
         array $excludedTablesRegexes = []
     ) {
-        $this->platform              = $platform;
-        $this->schemaManager         = $schemaManager;
-        $this->migrationGenerator    = $migrationGenerator;
+        $this->platform = $platform;
+        $this->schemaManager = $schemaManager;
+        $this->migrationGenerator = $migrationGenerator;
         $this->migrationSqlGenerator = $migrationSqlGenerator;
         $this->excludedTablesRegexes = $excludedTablesRegexes;
     }
 
     /**
+     * @param string $fqcn
      * @param string[] $excludedTablesRegexes
-     *
-     * @throws NoTablesFound
+     * @param bool $formatted
+     * @param int $lineLength
+     * @return string
+     * @throws Exception
      */
     public function dump(
         string $fqcn,
@@ -82,7 +86,7 @@ class SchemaDumper
     ): string {
         $schema = $this->schemaManager->createSchema();
 
-        $up   = [];
+        $up = [];
         $down = [];
 
         foreach ($schema->getTables() as $table) {
@@ -121,7 +125,7 @@ class SchemaDumper
             throw NoTablesFound::new();
         }
 
-        $up   = implode("\n", $up);
+        $up = implode("\n", $up);
         $down = implode("\n", $down);
 
         return $this->migrationGenerator->generateMigration(
@@ -132,7 +136,9 @@ class SchemaDumper
     }
 
     /**
+     * @param Table $table
      * @param string[] $excludedTablesRegexes
+     * @return bool
      */
     private function shouldSkipTable(Table $table, array $excludedTablesRegexes): bool
     {
@@ -150,19 +156,28 @@ class SchemaDumper
      * is an internal error in the PCRE engine.
      * Copied from https://github.com/symfony/symfony/blob/62216ea67762b18982ca3db73c391b0748a49d49/src/Symfony/Component/Yaml/Parser.php#L1072-L1090
      *
+     * @param mixed[] $matches
      * @internal
      *
-     * @param mixed[] $matches
      */
-    private static function pregMatch(string $pattern, string $subject, ?array &$matches = null, int $flags = 0, int $offset = 0): int
-    {
+    private static function pregMatch(
+        string $pattern,
+        string $subject,
+        ?array &$matches = null,
+        int $flags = 0,
+        int $offset = 0
+    ): int {
         try {
             $errorMessages = [];
-            set_error_handler(static function (int $severity, string $message, string $file, int $line, array $params) use (&$errorMessages): bool {
-                $errorMessages[] = $message;
+            set_error_handler(
+                static function (int $severity, string $message, string $file, int $line) use (
+                    &$errorMessages
+                ): bool {
+                    $errorMessages[] = $message;
 
-                return true;
-            });
+                    return true;
+                }
+            );
             $ret = preg_match($pattern, $subject, $matches, $flags, $offset);
         } finally {
             restore_error_handler();
@@ -171,7 +186,10 @@ class SchemaDumper
         if ($ret === false) {
             switch (preg_last_error()) {
                 case PREG_INTERNAL_ERROR:
-                    $error = sprintf('Internal PCRE error, please check your Regex. Reported errors: %s.', implode(', ', $errorMessages));
+                    $error = sprintf(
+                        'Internal PCRE error, please check your Regex. Reported errors: %s.',
+                        implode(', ', $errorMessages)
+                    );
                     break;
                 case PREG_BACKTRACK_LIMIT_ERROR:
                     $error = 'pcre.backtrack_limit reached.';

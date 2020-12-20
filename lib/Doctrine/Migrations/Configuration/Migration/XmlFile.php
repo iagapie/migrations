@@ -26,7 +26,7 @@ final class XmlFile extends ConfigurationFile
 {
     public function getConfiguration(): Configuration
     {
-        if (! file_exists($this->file)) {
+        if (!file_exists($this->file)) {
             throw FileNotFound::new($this->file);
         }
 
@@ -66,7 +66,7 @@ final class XmlFile extends ConfigurationFile
 
         $itemsToCheck = $loopOverNodes ? $root->children() : $root->attributes();
 
-        if (! ($itemsToCheck instanceof SimpleXMLElement)) {
+        if (!($itemsToCheck instanceof SimpleXMLElement)) {
             return $config;
         }
 
@@ -75,17 +75,17 @@ final class XmlFile extends ConfigurationFile
             if ($nodeName === 'migrations_paths') {
                 $config['migrations_paths'] = [];
                 foreach ($node->{'path'} as $pathNode) {
-                    $config['migrations_paths'][(string) $pathNode['namespace']] = (string) $pathNode;
+                    $config['migrations_paths'][(string)$pathNode['namespace']] = (string)$pathNode;
                 }
             } elseif ($nodeName === 'storage' && $node->{'table-storage'} instanceof SimpleXMLElement) {
                 $config['table_storage'] = $this->extractParameters($node->{'table-storage'}, false);
             } elseif ($nodeName === 'migrations') {
                 $config['migrations'] = [];
                 foreach ($node->{'migration'} as $pathNode) {
-                    $config['migrations'][] = (string) $pathNode;
+                    $config['migrations'][] = (string)$pathNode;
                 }
             } else {
-                $config[$nodeName] = (string) $node;
+                $config[$nodeName] = (string)$node;
             }
         }
 
@@ -103,7 +103,7 @@ final class XmlFile extends ConfigurationFile
                 throw XmlNotValid::malformed();
             }
 
-            $xsdPath = __DIR__ . DIRECTORY_SEPARATOR . 'XML' . DIRECTORY_SEPARATOR . 'configuration.xsd';
+            $xsdPath = __DIR__.DIRECTORY_SEPARATOR.'XML'.DIRECTORY_SEPARATOR.'configuration.xsd';
 
             if ($xml->schemaValidate($xsdPath) === false) {
                 throw XmlNotValid::failedValidation();

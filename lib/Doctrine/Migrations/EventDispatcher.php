@@ -28,7 +28,7 @@ final class EventDispatcher
     public function __construct(Connection $connection, EventManager $eventManager)
     {
         $this->eventManager = $eventManager;
-        $this->connection   = $connection;
+        $this->connection = $connection;
     }
 
     public function dispatchMigrationEvent(

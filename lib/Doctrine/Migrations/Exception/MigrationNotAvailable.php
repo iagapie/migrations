@@ -16,7 +16,7 @@ final class MigrationNotAvailable extends RuntimeException implements MigrationE
         return new self(
             sprintf(
                 'The migration %s is not available',
-                (string) $version
+                (string)$version
             ),
             5
         );

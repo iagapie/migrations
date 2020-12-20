@@ -21,7 +21,7 @@ final class AvailableMigration
 
     public function __construct(Version $version, AbstractMigration $migration)
     {
-        $this->version   = $version;
+        $this->version = $version;
         $this->migration = $migration;
     }
 

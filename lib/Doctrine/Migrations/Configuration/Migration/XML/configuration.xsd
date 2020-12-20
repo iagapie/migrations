@@ -44,7 +44,6 @@
                 </xs:element>
 
                 <xs:element type="xs:string" name="connection" minOccurs="0" maxOccurs="1"/>
-                <xs:element type="xs:string" name="em" minOccurs="0" maxOccurs="1"/>
 
                 <xs:element type="xs:boolean" name="all-or-nothing" minOccurs="0" maxOccurs="1"/>
                 <xs:element type="xs:boolean" name="check-database-platform" minOccurs="0" maxOccurs="1"/>

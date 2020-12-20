@@ -33,7 +33,8 @@ final class GenerateCommand extends DoctrineCommand
                 InputOption::VALUE_REQUIRED,
                 'The namespace to use for the migration (must be in the list of configured namespaces)'
             )
-            ->setHelp(<<<EOT
+            ->setHelp(
+                <<<EOT
 The <info>%command.name%</info> command generates a blank migration class:
 
     <info>%command.full_name%</info>
@@ -58,7 +59,7 @@ EOT
         $dirs = $configuration->getMigrationDirectories();
         if ($namespace === null) {
             $namespace = key($dirs);
-        } elseif (! isset($dirs[$namespace])) {
+        } elseif (!isset($dirs[$namespace])) {
             throw new Exception(sprintf('Path not defined for the namespace %s', $namespace));
         }
 
@@ -68,20 +69,22 @@ EOT
 
         $path = $migrationGenerator->generateMigration($fqcn);
 
-        $this->io->text([
-            sprintf('Generated new migration class to "<info>%s</info>"', $path),
-            '',
-            sprintf(
-                'To run just this migration for testing purposes, you can use <info>migrations:execute --up \'%s\'</info>',
-                $fqcn
-            ),
-            '',
-            sprintf(
-                'To revert the migration you can use <info>migrations:execute --down \'%s\'</info>',
-                $fqcn
-            ),
-            '',
-        ]);
+        $this->io->text(
+            [
+                sprintf('Generated new migration class to "<info>%s</info>"', $path),
+                '',
+                sprintf(
+                    'To run just this migration for testing purposes, you can use <info>migrations:execute --up \'%s\'</info>',
+                    $fqcn
+                ),
+                '',
+                sprintf(
+                    'To revert the migration you can use <info>migrations:execute --down \'%s\'</info>',
+                    $fqcn
+                ),
+                '',
+            ]
+        );
 
         return 0;
     }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Doctrine\Migrations;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use Doctrine\Migrations\Metadata\MigrationPlanList;
 use Doctrine\Migrations\Query\Query;
 use Doctrine\Migrations\Tools\BytesFormatter;
@@ -47,15 +48,19 @@ class DbalMigrator implements Migrator
         LoggerInterface $logger,
         Stopwatch $stopwatch
     ) {
-        $this->stopwatch  = $stopwatch;
-        $this->logger     = $logger;
-        $this->executor   = $executor;
+        $this->stopwatch = $stopwatch;
+        $this->logger = $logger;
+        $this->executor = $executor;
         $this->connection = $connection;
         $this->dispatcher = $dispatcher;
     }
 
     /**
+     * @param MigrationPlanList $migrationsPlan
+     * @param MigratorConfiguration $migratorConfiguration
      * @return array<string, Query[]>
+     * @throws Throwable
+     * @throws Exception
      */
     private function executeMigrations(
         MigrationPlanList $migrationsPlan,
@@ -68,11 +73,19 @@ class DbalMigrator implements Migrator
         }
 
         try {
-            $this->dispatcher->dispatchMigrationEvent(Events::onMigrationsMigrating, $migrationsPlan, $migratorConfiguration);
+            $this->dispatcher->dispatchMigrationEvent(
+                Events::onMigrationsMigrating,
+                $migrationsPlan,
+                $migratorConfiguration
+            );
 
             $sql = $this->executePlan($migrationsPlan, $migratorConfiguration);
 
-            $this->dispatcher->dispatchMigrationEvent(Events::onMigrationsMigrated, $migrationsPlan, $migratorConfiguration);
+            $this->dispatcher->dispatchMigrationEvent(
+                Events::onMigrationsMigrated,
+                $migrationsPlan,
+                $migratorConfiguration
+            );
         } catch (Throwable $e) {
             if ($allOrNothing) {
                 $this->connection->rollBack();
@@ -81,7 +94,7 @@ class DbalMigrator implements Migrator
             throw $e;
         }
 
-        if ($allOrNothing) {
+        if ($allOrNothing && !$this->connection->isAutoCommit()) {
             $this->connection->commit();
         }
 
@@ -89,11 +102,13 @@ class DbalMigrator implements Migrator
     }
 
     /**
+     * @param MigrationPlanList $migrationsPlan
+     * @param MigratorConfiguration $migratorConfiguration
      * @return array<string, Query[]>
      */
     private function executePlan(MigrationPlanList $migrationsPlan, MigratorConfiguration $migratorConfiguration): array
     {
-        $sql  = [];
+        $sql = [];
         $time = 0;
 
         foreach ($migrationsPlan->getItems() as $plan) {
@@ -102,25 +117,24 @@ class DbalMigrator implements Migrator
             // capture the to Schema for the migration so we have the ability to use
             // it as the from Schema for the next migration when we are running a dry run
             // $toSchema may be null in the case of skipped migrations
-            if (! $versionExecutionResult->isSkipped()) {
+            if (!$versionExecutionResult->isSkipped()) {
                 $migratorConfiguration->setFromSchema($versionExecutionResult->getToSchema());
             }
 
-            $sql[(string) $plan->getVersion()] = $versionExecutionResult->getSql();
-            $time                             += $versionExecutionResult->getTime();
+            $sql[(string)$plan->getVersion()] = $versionExecutionResult->getSql();
+            $time += $versionExecutionResult->getTime();
         }
 
         return $sql;
     }
 
     /**
+     * @param StopwatchEvent $stopwatchEvent
+     * @param MigrationPlanList $migrationsPlan
      * @param array<string, Query[]> $sql
      */
-    private function endMigrations(
-        StopwatchEvent $stopwatchEvent,
-        MigrationPlanList $migrationsPlan,
-        array $sql
-    ): void {
+    private function endMigrations(StopwatchEvent $stopwatchEvent, MigrationPlanList $migrationsPlan, array $sql): void
+    {
         $stopwatchEvent->stop();
 
         $this->logger->notice(

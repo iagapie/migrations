@@ -44,13 +44,15 @@ final class ConfigurationArray implements ConfigurationLoader
             },
 
             'connection' => 'setConnectionName',
-            'em' => 'setEntityManagerName',
 
             'table_storage' => [
                 'table_name' => 'setTableName',
                 'version_column_name' => 'setVersionColumnName',
-                'version_column_length' => static function ($value, TableMetadataStorageConfiguration $configuration): void {
-                    $configuration->setVersionColumnLength((int) $value);
+                'version_column_length' => static function (
+                    $value,
+                    TableMetadataStorageConfiguration $configuration
+                ): void {
+                    $configuration->setVersionColumnLength((int)$value);
                 },
                 'executed_at_column_name' => 'setExecutedAtColumnName',
                 'execution_time_column_name' => 'setExecutionTimeColumnName',
@@ -59,10 +61,14 @@ final class ConfigurationArray implements ConfigurationLoader
             'organize_migrations' => 'setMigrationOrganization',
             'custom_template' => 'setCustomTemplate',
             'all_or_nothing' => static function ($value, Configuration $configuration): void {
-                $configuration->setAllOrNothing(is_bool($value) ? $value : BooleanStringFormatter::toBoolean($value, false));
+                $configuration->setAllOrNothing(
+                    is_bool($value) ? $value : BooleanStringFormatter::toBoolean($value, false)
+                );
             },
-            'check_database_platform' =>  static function ($value, Configuration $configuration): void {
-                $configuration->setCheckDatabasePlatform(is_bool($value) ? $value : BooleanStringFormatter::toBoolean($value, false));
+            'check_database_platform' => static function ($value, Configuration $configuration): void {
+                $configuration->setCheckDatabasePlatform(
+                    is_bool($value) ? $value : BooleanStringFormatter::toBoolean($value, false)
+                );
             },
         ];
 
@@ -77,20 +83,20 @@ final class ConfigurationArray implements ConfigurationLoader
     }
 
     /**
-     * @param mixed[]                                         $configMap
+     * @param mixed[] $configMap
      * @param Configuration|TableMetadataStorageConfiguration $object
-     * @param array<string|int,mixed>                         $data
+     * @param array<string|int,mixed> $data
      */
     private static function applyConfigs(array $configMap, $object, array $data): void
     {
         foreach ($data as $configurationKey => $configurationValue) {
-            if (! isset($configMap[$configurationKey])) {
-                throw InvalidConfigurationKey::new((string) $configurationKey);
+            if (!isset($configMap[$configurationKey])) {
+                throw InvalidConfigurationKey::new((string)$configurationKey);
             }
 
             if (is_array($configMap[$configurationKey])) {
                 if ($configurationKey !== 'table_storage') {
-                    throw InvalidConfigurationKey::new((string) $configurationKey);
+                    throw InvalidConfigurationKey::new((string)$configurationKey);
                 }
 
                 $storageConfig = new TableMetadataStorageConfiguration();

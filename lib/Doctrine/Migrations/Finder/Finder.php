@@ -36,7 +36,7 @@ abstract class Finder implements MigrationFinder
     {
         $dir = realpath($directory);
 
-        if ($dir === false || ! is_dir($dir)) {
+        if ($dir === false || !is_dir($dir)) {
             throw InvalidDirectory::new($directory);
         }
 
@@ -62,7 +62,7 @@ abstract class Finder implements MigrationFinder
             $includedFiles[] = $realFile;
         }
 
-        $classes  = $this->loadMigrationClasses($includedFiles, $namespace);
+        $classes = $this->loadMigrationClasses($includedFiles, $namespace);
         $versions = [];
         foreach ($classes as $class) {
             $versions[] = $class->getName();
@@ -77,7 +77,7 @@ abstract class Finder implements MigrationFinder
      * Look up all declared classes and find those classes contained
      * in the given `$files` array.
      *
-     * @param string[]    $files     The set of files that were `required`
+     * @param string[] $files The set of files that were `required`
      * @param string|null $namespace If not null only classes in this namespace will be returned
      *
      * @return ReflectionClass<object>[] the classes in `$files`
@@ -88,11 +88,11 @@ abstract class Finder implements MigrationFinder
         foreach (get_declared_classes() as $class) {
             $reflectionClass = new ReflectionClass($class);
 
-            if (! in_array($reflectionClass->getFileName(), $files, true)) {
+            if (!in_array($reflectionClass->getFileName(), $files, true)) {
                 continue;
             }
 
-            if ($namespace !== null && ! $this->isReflectionClassInNamespace($reflectionClass, $namespace)) {
+            if ($namespace !== null && !$this->isReflectionClassInNamespace($reflectionClass, $namespace)) {
                 continue;
             }
 
@@ -107,6 +107,6 @@ abstract class Finder implements MigrationFinder
      */
     private function isReflectionClassInNamespace(ReflectionClass $reflectionClass, string $namespace): bool
     {
-        return strncmp($reflectionClass->getName(), $namespace . '\\', strlen($namespace) + 1) === 0;
+        return strncmp($reflectionClass->getName(), $namespace.'\\', strlen($namespace) + 1) === 0;
     }
 }

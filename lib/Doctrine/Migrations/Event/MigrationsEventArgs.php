@@ -28,8 +28,8 @@ final class MigrationsEventArgs extends EventArgs
         MigrationPlanList $plan,
         MigratorConfiguration $migratorConfiguration
     ) {
-        $this->connection            = $connection;
-        $this->plan                  = $plan;
+        $this->connection = $connection;
+        $this->plan = $plan;
         $this->migratorConfiguration = $migratorConfiguration;
     }
 

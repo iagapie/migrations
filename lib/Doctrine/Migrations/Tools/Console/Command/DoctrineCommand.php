@@ -9,7 +9,6 @@ use Doctrine\Migrations\Configuration\Migration\ConfigurationFileWithFallback;
 use Doctrine\Migrations\DependencyFactory;
 use Doctrine\Migrations\Tools\Console\ConsoleLogger;
 use Doctrine\Migrations\Tools\Console\Exception\DependenciesNotSatisfied;
-use Doctrine\Migrations\Tools\Console\Exception\InvalidOptionUsage;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -47,13 +46,6 @@ abstract class DoctrineCommand extends Command
         );
 
         $this->addOption(
-            'em',
-            null,
-            InputOption::VALUE_REQUIRED,
-            'The name of the entity manager to use.'
-        );
-
-        $this->addOption(
             'conn',
             null,
             InputOption::VALUE_REQUIRED,
@@ -79,12 +71,12 @@ abstract class DoctrineCommand extends Command
 
         $configurationParameter = $input->getOption('configuration');
         if ($this->dependencyFactory === null) {
-            $configurationLoader     = new ConfigurationFileWithFallback(
+            $configurationLoader = new ConfigurationFileWithFallback(
                 is_string($configurationParameter)
                     ? $configurationParameter
                     : null
             );
-            $connectionLoader        = new ConfigurationFile($input->getOption('db-configuration'));
+            $connectionLoader = new ConfigurationFile($input->getOption('db-configuration'));
             $this->dependencyFactory = DependencyFactory::fromConnection($configurationLoader, $connectionLoader);
         } elseif (is_string($configurationParameter)) {
             $configurationLoader = new ConfigurationFileWithFallback($configurationParameter);
@@ -113,22 +105,12 @@ abstract class DoctrineCommand extends Command
 
     protected function canExecute(string $question, InputInterface $input): bool
     {
-        return ! $input->isInteractive() || $this->io->confirm($question);
+        return !$input->isInteractive() || $this->io->confirm($question);
     }
 
     private function setNamedEmOrConnection(InputInterface $input): void
     {
-        $emName   = $input->getOption('em');
         $connName = $input->getOption('conn');
-        if ($emName !== null && $connName !== null) {
-            throw new InvalidOptionUsage('You can specify only one of the --em and --conn options.');
-        }
-
-        if ($this->dependencyFactory->hasEntityManager() && $emName !== null) {
-            $this->dependencyFactory->getConfiguration()->setEntityManagerName($emName);
-
-            return;
-        }
 
         if ($connName !== null) {
             $this->dependencyFactory->getConfiguration()->setConnectionName($connName);

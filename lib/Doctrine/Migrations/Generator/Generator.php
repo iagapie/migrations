@@ -87,7 +87,7 @@ TEMPLATE;
         [$fqcn, $namespace, $className] = $mch;
 
         $dirs = $this->configuration->getMigrationDirectories();
-        if (! isset($dirs[$namespace])) {
+        if (!isset($dirs[$namespace])) {
             throw new InvalidArgumentException(sprintf('Path not defined for the namespace "%s"', $namespace));
         }
 
@@ -96,16 +96,16 @@ TEMPLATE;
         $replacements = [
             '<namespace>' => $namespace,
             '<className>' => $className,
-            '<up>' => $up !== null ? '        ' . implode("\n        ", explode("\n", $up)) : null,
-            '<down>' => $down !== null ? '        ' . implode("\n        ", explode("\n", $down)) : null,
+            '<up>' => $up !== null ? '        '.implode("\n        ", explode("\n", $up)) : null,
+            '<down>' => $down !== null ? '        '.implode("\n        ", explode("\n", $down)) : null,
         ];
 
         $code = strtr($this->getTemplate(), $replacements);
         $code = preg_replace('/^ +$/m', '', $code);
 
         $directoryHelper = new MigrationDirectoryHelper();
-        $dir             = $directoryHelper->getMigrationDirectory($this->configuration, $dir);
-        $path            = $dir . '/' . $className . '.php';
+        $dir = $directoryHelper->getMigrationDirectory($this->configuration, $dir);
+        $path = $dir.'/'.$className.'.php';
 
         file_put_contents($path, $code);
 
@@ -136,7 +136,7 @@ TEMPLATE;
             return null;
         }
 
-        if (! is_file($customTemplate) || ! is_readable($customTemplate)) {
+        if (!is_file($customTemplate) || !is_readable($customTemplate)) {
             throw InvalidTemplateSpecified::notFoundOrNotReadable($customTemplate);
         }
 

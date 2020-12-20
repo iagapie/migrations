@@ -39,8 +39,8 @@ final class ExecutedMigrationsList implements Countable
 
     public function getFirst(int $offset = 0): ExecutedMigration
     {
-        if (! isset($this->items[$offset])) {
-            throw NoMigrationsFoundWithCriteria::new('first' . ($offset > 0 ? '+' . $offset : ''));
+        if (!isset($this->items[$offset])) {
+            throw NoMigrationsFoundWithCriteria::new('first'.($offset > 0 ? '+'.$offset : ''));
         }
 
         return $this->items[$offset];
@@ -49,8 +49,8 @@ final class ExecutedMigrationsList implements Countable
     public function getLast(int $offset = 0): ExecutedMigration
     {
         $offset = count($this->items) - 1 - (-1 * $offset);
-        if (! isset($this->items[$offset])) {
-            throw NoMigrationsFoundWithCriteria::new('last' . ($offset > 0 ? '+' . $offset : ''));
+        if (!isset($this->items[$offset])) {
+            throw NoMigrationsFoundWithCriteria::new('last'.($offset > 0 ? '+'.$offset : ''));
         }
 
         return $this->items[$offset];
@@ -80,6 +80,6 @@ final class ExecutedMigrationsList implements Countable
             }
         }
 
-        throw MigrationNotExecuted::new((string) $version);
+        throw MigrationNotExecuted::new((string)$version);
     }
 }

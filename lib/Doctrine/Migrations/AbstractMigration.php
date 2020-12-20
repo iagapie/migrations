@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Doctrine\Migrations;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Doctrine\DBAL\Schema\Schema;
@@ -42,9 +42,9 @@ abstract class AbstractMigration
     public function __construct(Connection $connection, LoggerInterface $logger)
     {
         $this->connection = $connection;
-        $this->sm         = $this->connection->getSchemaManager();
-        $this->platform   = $this->connection->getDatabasePlatform();
-        $this->logger     = $logger;
+        $this->sm = $this->connection->getSchemaManager();
+        $this->platform = $this->connection->getDatabasePlatform();
+        $this->logger = $logger;
     }
 
     /**
@@ -68,7 +68,7 @@ abstract class AbstractMigration
 
     public function warnIf(bool $condition, string $message = 'Unknown Reason'): void
     {
-        if (! $condition) {
+        if (!$condition) {
             return;
         }
 
@@ -76,6 +76,8 @@ abstract class AbstractMigration
     }
 
     /**
+     * @param bool $condition
+     * @param string $message
      * @throws AbortMigration
      */
     public function abortIf(bool $condition, string $message = 'Unknown Reason'): void
@@ -86,6 +88,8 @@ abstract class AbstractMigration
     }
 
     /**
+     * @param bool $condition
+     * @param string $message
      * @throws SkipMigration
      */
     public function skipIf(bool $condition, string $message = 'Unknown Reason'): void
@@ -96,40 +100,47 @@ abstract class AbstractMigration
     }
 
     /**
-     * @throws MigrationException|DBALException
+     * @param Schema $schema
+     * @throws MigrationException|Exception
      */
     public function preUp(Schema $schema): void
     {
     }
 
     /**
-     * @throws MigrationException|DBALException
+     * @param Schema $schema
+     * @throws MigrationException|Exception
      */
     public function postUp(Schema $schema): void
     {
     }
 
     /**
-     * @throws MigrationException|DBALException
+     * @param Schema $schema
+     * @throws MigrationException|Exception
      */
     public function preDown(Schema $schema): void
     {
     }
 
     /**
-     * @throws MigrationException|DBALException
+     * @param Schema $schema
+     * @throws MigrationException|Exception
      */
     public function postDown(Schema $schema): void
     {
     }
 
     /**
-     * @throws MigrationException|DBALException
+     * @param Schema $schema
+     * @throws MigrationException
+     * @throws Exception
      */
     abstract public function up(Schema $schema): void;
 
     /**
-     * @throws MigrationException|DBALException
+     * @param Schema $schema
+     * @throws MigrationException
      */
     public function down(Schema $schema): void
     {
@@ -137,6 +148,7 @@ abstract class AbstractMigration
     }
 
     /**
+     * @param string $sql
      * @param mixed[] $params
      * @param mixed[] $types
      */
@@ -162,7 +174,7 @@ abstract class AbstractMigration
     }
 
     /**
-     * @throws IrreversibleMigration
+     * @param string|null $message
      */
     protected function throwIrreversibleMigrationException(?string $message = null): void
     {

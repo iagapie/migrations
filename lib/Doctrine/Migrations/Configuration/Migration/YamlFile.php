@@ -21,11 +21,11 @@ final class YamlFile extends ConfigurationFile
 {
     public function getConfiguration(): Configuration
     {
-        if (! class_exists(Yaml::class)) {
+        if (!class_exists(Yaml::class)) {
             throw YamlNotAvailable::new();
         }
 
-        if (! file_exists($this->file)) {
+        if (!file_exists($this->file)) {
             throw FileNotFound::new($this->file);
         }
 
@@ -39,7 +39,7 @@ final class YamlFile extends ConfigurationFile
             throw YamlNotValid::malformed();
         }
 
-        if (! is_array($config)) {
+        if (!is_array($config)) {
             throw YamlNotValid::invalid();
         }
 

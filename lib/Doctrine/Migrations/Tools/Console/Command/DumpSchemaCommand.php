@@ -22,8 +22,6 @@ use function strpos;
 /**
  * The DumpSchemaCommand class is responsible for dumping your current database schema to a migration class. This is
  * intended to be used in conjunction with the RollupCommand.
- *
- * @see Doctrine\Migrations\Tools\Console\Command\RollupCommand
  */
 final class DumpSchemaCommand extends DoctrineCommand
 {
@@ -37,7 +35,8 @@ final class DumpSchemaCommand extends DoctrineCommand
         $this
             ->setAliases(['dump-schema'])
             ->setDescription('Dump the schema for your database to a migration.')
-            ->setHelp(<<<EOT
+            ->setHelp(
+                <<<EOT
 The <info>%command.name%</info> command dumps the schema for your database to a migration:
 
     <info>%command.full_name%</info>
@@ -79,13 +78,13 @@ EOT
         InputInterface $input,
         OutputInterface $output
     ): int {
-        $formatted  = $input->getOption('formatted');
-        $lineLength = (int) $input->getOption('line-length');
+        $formatted = $input->getOption('formatted');
+        $lineLength = (int)$input->getOption('line-length');
 
         $schemaDumper = $this->getDependencyFactory()->getSchemaDumper();
 
         if ($formatted) {
-            if (! class_exists(SqlFormatter::class)) {
+            if (!class_exists(SqlFormatter::class)) {
                 throw InvalidOptionUsage::new(
                     'The "--formatted" option can only be used if the sql formatter is installed. Please run "composer require doctrine/sql-formatter".'
                 );
@@ -96,7 +95,7 @@ EOT
 
         $namespace = $input->getOption('namespace');
         if ($namespace === null) {
-            $dirs      = $configuration->getMigrationDirectories();
+            $dirs = $configuration->getMigrationDirectories();
             $namespace = key($dirs);
         }
 
@@ -113,22 +112,24 @@ EOT
             $lineLength
         );
 
-        $this->io->text([
-            sprintf('Dumped your schema to a new migration class at "<info>%s</info>"', $path),
-            '',
-            sprintf(
-                'To run just this migration for testing purposes, you can use <info>migrations:execute --up \'%s\'</info>',
-                addslashes($fqcn)
-            ),
-            '',
-            sprintf(
-                'To revert the migration you can use <info>migrations:execute --down \'%s\'</info>',
-                addslashes($fqcn)
-            ),
-            '',
-            'To use this as a rollup migration you can use the <info>migrations:rollup</info> command.',
-            '',
-        ]);
+        $this->io->text(
+            [
+                sprintf('Dumped your schema to a new migration class at "<info>%s</info>"', $path),
+                '',
+                sprintf(
+                    'To run just this migration for testing purposes, you can use <info>migrations:execute --up \'%s\'</info>',
+                    addslashes($fqcn)
+                ),
+                '',
+                sprintf(
+                    'To revert the migration you can use <info>migrations:execute --down \'%s\'</info>',
+                    addslashes($fqcn)
+                ),
+                '',
+                'To use this as a rollup migration you can use the <info>migrations:rollup</info> command.',
+                '',
+            ]
+        );
 
         return 0;
     }
@@ -137,7 +138,7 @@ EOT
     {
         $migrations = $this->getDependencyFactory()->getMigrationRepository()->getMigrations();
         foreach ($migrations->getItems() as $migration) {
-            if (strpos((string) $migration->getVersion(), $namespace) !== false) {
+            if (strpos((string)$migration->getVersion(), $namespace) !== false) {
                 throw SchemaDumpRequiresNoMigrations::new($namespace);
             }
         }
